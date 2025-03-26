@@ -2,12 +2,49 @@ pipeline {
     agent any
 
     stages {
-        stage('Test') {
-            steps {
-                echo 'Hello World' // this is not an sh commande it is implemented by jenkins
-                sh 'echo "Hello World made by script shell"' // this is how you lunch a shell commande
-                sh 'whoami' // shell commande that define the current user
+        
+        stage('Build'){
+            agent{
+                docker{
+                    image "node:23-alpine"
+                    reuseNode true
+                }
+            }
+            steps{
+                // ceci pour tracer lors des nouveaux build pour voir ci on a zaper la version node
+                sh '''
+                    ls -la
+                    node --version
+                    npm --version
+                    npm ci
+                    npm run build
+                    ls -la
+                '''
+            }
+        }
+        
+        stage('Test'){
+
+            agent{
+                docker{
+                    image 'node:23-alpine'
+                    reuseNode true
+                }
+            }
+
+            steps{
+                sh '''
+                    test -f build/index.html
+                    npm test
+                '''
             }
         }
     }
+
+    post{
+        always{
+            junit 'test-results/junit.xml'
+        }
+    }
 }
+
