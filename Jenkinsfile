@@ -39,6 +39,26 @@ pipeline {
                 '''
             }
         }
+
+        stage('Deploy'){
+
+            agent{
+                docker{
+                    image 'node:23-alpine'
+                    reuseNode true
+                }
+            }
+
+            steps{
+                // installing netlify creates permission errors and so we install it and 
+                // call it from the node-modules folder
+                sh '''
+                    ls -la
+                    npm install netlify-cli
+                    node_modules/.bin/netlify --version
+                '''
+            }
+        }
     }
 
     post{
