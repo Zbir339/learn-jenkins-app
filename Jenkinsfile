@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment{
+        NETLIFY_SITE_ID = 'a75245a9-7ac6-4638-a477-6f701cd55381'
+    }
+
     stages {
         
         stage('Build'){
@@ -12,6 +16,7 @@ pipeline {
             }
             steps{
                 // ceci pour tracer lors des nouveaux build pour voir ci on a zaper la version node
+                // npm ci --> clean install for ci / cd measures
                 sh '''
                     ls -la
                     node --version
@@ -56,6 +61,7 @@ pipeline {
                     ls -la
                     npm install netlify-cli
                     node_modules/.bin/netlify --version
+                    echo "deploying to production site ID: $NETLIFY_SITE_ID"
                 '''
             }
         }
